@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.leon.repository.RoleUserRepository">
+
+    <select id="queryList" resultType="cn.leon.bo.RoleUserBo">
+        SELECT
+            *
+        FROM r_role_user
+    </select>
+
+    <insert id="insertList">
+        INSERT INTO r_role_user
+          (
+          )
+        <foreach collection="roleUsers" item="ru" open="VALUES (" separator="), (" close=")">
+        </foreach>
+    </insert>
+</mapper>
