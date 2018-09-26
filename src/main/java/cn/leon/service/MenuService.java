@@ -1,73 +1,75 @@
 package cn.leon.service;
 
-import cn.leon.entity.MenuEntity;
+import cn.leon.dao.MenuDao;
+import cn.leon.dao.RoleDao;
+import cn.leon.model.MenuEntity;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
-public interface MenuService {
+@Service
+public class MenuService {
 
-    /**
-     * 得到菜单List
-     *
-     * @param id
-     * @return
-     */
-    List<MenuEntity> menuList(int id);
+    @Resource
+    private MenuDao menuDao;
 
-    /**
-     * 获取menus列表
-     *
-     * @param pageSize
-     * @param menuId
-     * @param i
-     * @return
-     */
-    List<MenuEntity> menusList(int pageSize, int start, String menuId);
+    @Resource
+    private RoleDao roleDao;
 
-    /**
-     * 获取menus列表的总量
-     *
-     * @param loginName
-     * @param pageSize
-     * @param menuId
-     * @param i
-     * @return
-     */
-    Integer menusSize(int pageSize, int start, String menuId);
+    public List<MenuEntity> menuList(Integer id) {
+        List<String> idList = roleDao.getModulesById(id);
 
-    /**
-     * 新建菜单信息
-     *
-     * @param menuEntity
-     */
-    void insertMenu(MenuEntity menuEntity);
+        String idstemp = "";
+        for (String idtemp : idList) {
+            idstemp = idstemp + idtemp;
+        }
+        String[] ids = idstemp.split(";");
+        List<MenuEntity> parentMenuList = menuDao.getParentMenuListById(ids);
+        List<MenuEntity> childrenMenuList = menuDao.getMenuListById(ids);
+        List<MenuEntity> menuList = new ArrayList<MenuEntity>();
 
-    /**
-     * 修改菜单信息
-     *
-     * @param menuEntity
-     */
-    void updateMenu(MenuEntity menuEntity);
+        for (MenuEntity parentMenu : parentMenuList) {
+            List<MenuEntity> menuListTemp = new ArrayList<MenuEntity>();
+            for (MenuEntity childrenMenu : childrenMenuList) {
+                if (parentMenu.getId() == childrenMenu.getParentId()) {
+                    menuListTemp.add(childrenMenu);
+                }
+            }
+            parentMenu.setChildren(menuListTemp);
+            menuList.add(parentMenu);
+        }
 
-    /**
-     * 删除菜单信息
-     *
-     * @param groupId
-     */
-    void deleteMenus(List<String> groupId);
+        return menuList;
+    }
 
-    /**
-     * 通过parentId得到menus列表
-     *
-     * @param parentId
-     * @return
-     */
-    List<MenuEntity> menusByParentId(int parentId);
+    public List<MenuEntity> menusList(int pageSize, int start, String menuId) {
+        return menuDao.menusList(pageSize, start, menuId);
+    }
 
-    /**
-     * 获取二级菜单
-     * @return
-     */
-    List<MenuEntity> getSubmenus();
+    public Integer menusSize(int pageSize, int start, String menuId) {
+        return menuDao.menusSize(pageSize, start, menuId);
+    }
+
+    public void insertMenu(MenuEntity menuEntity) {
+        menuDao.insertMenu(menuEntity);
+    }
+
+    public void updateMenu(MenuEntity menuEntity) {
+        menuDao.updateMenu(menuEntity);
+    }
+
+    public void deleteMenus(List<String> groupId) {
+        menuDao.deleteMenus(groupId);
+    }
+
+    public List<MenuEntity> menusByParentId(int parentId) {
+        return menuDao.menusByParentId(parentId);
+    }
+
+    public List<MenuEntity> getSubmenus() {
+        return menuDao.getSubmenus();
+    }
 
 }
